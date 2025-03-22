@@ -5,13 +5,13 @@ Currently, we support two software engineering tasks: Vulnerability detection an
 ### We explain how to run our code in the below:
 If you want to run the vulnerability detection task, please go to vulnerability detection folder, then select the model folder you want to run. For each folder, unzip the dataset.zip file. 
 Then run: 
-### python preprocess.py 
+python preprocess.py 
 file to extract the train, valid, and test dataset. This step can be ignored for defect prediction task. 
 
 For selected model on each task: 
 
 ## 1) Finetune the model: 
-./run.sh command
+./run.sh 
 
 ## 2) Test your finetuned model: 
 ./test.sh
