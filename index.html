@@ -34,6 +34,9 @@
 </head>
 
 <body>
+    <header>
+        <h1>Beyond Confidence: Rethinking Uncertainty Calibration in Deep Code Models </h1>
+    </header>
     <!-- Abstract Section -->
     <section class="section">
         <div class="container is-max-desktop">
@@ -42,8 +45,28 @@
                     <h2 class="title is-3">Abstract</h2>
                     <div class="content has-text-justified">
                         <p>
-                            Deep learning models have shown significant promise in code related tasks. While confidence calibration techniques have been proposed to improve model reliability, their effectiveness in real world tasks with strict accuracy requirements remains uncertain...
-                        </p>
+                        Deep learning models have shown significant promise in coderelated tasks. While confidence calibration techniques have been
+proposed to improve model reliability, their effectiveness in realworld tasks with strict accuracy requirements remains uncertain. In
+this paper, we investigate two key questions: first, whether existing
+measurement metrics, including confidence scores and uncertainty
+metrics, are effective for guiding selective prediction; and second,
+whether existing calibration techniques can improve these metrics to better identify cases where model predictions are likely to
+succeed or fail </br>
+                            Through a systematic study using code models for defect prediction and vulnerability detection, our findings reveal that traditional
+calibration metrics often fail to prioritize high-confidence predictions, which are crucial for practical deployment. To address this,
+we propose a novel metric based on variation consistency across
+model predictions, leveraging insights from ensemble methods
+while reducing computational overhead. Additionally, we introduce
+a weighted calibration technique that emphasizes high-confidence
+predictions by assigning greater weight to confident outputs while
+reducing the influence of low-confidence samples. </br>
+
+                        Our empirical results show that the proposed methods improve
+the ability to distinguish between correct and incorrect predictions
+upto 96.3%, enhancing selective prediction performance. These
+insights provide a promising direction for increasing the reliability
+and practical utility of deep learning-based code models.
+    </p>
                     </div>
                 </div>
             </div>
