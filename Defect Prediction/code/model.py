@@ -1,0 +1,159 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+import torch
+import torch.nn as nn
+import torch
+from torch.autograd import Variable
+import copy
+from torch.nn import CrossEntropyLoss, MSELoss
+import torch.nn.functional as F
+from peft import PeftModel
+    
+    
+class Model(nn.Module):   
+    def __init__(self, encoder, config, tokenizer, args):
+        super(Model, self).__init__()
+        self.encoder = encoder
+        self.config=config
+        self.tokenizer=tokenizer
+        self.args=args
+    
+        
+    def forward(self, input_ids=None, labels=None, weight=None): 
+        outputs=self.encoder(input_ids,attention_mask=input_ids.ne(1))[0]
+        logits=outputs
+        prob=torch.sigmoid(logits)
+        if labels is not None:
+            labels=labels.float()
+            if weight == None:
+                loss=torch.log(prob[:,0]+1e-10)*labels+torch.log((1-prob)[:,0]+1e-10)*(1-labels)
+            else:
+                loss=torch.log(prob[:,0]+1e-10)*labels*weight[1]+torch.log((1-prob)[:,0]+1e-10)*(1-labels)*weight[0]
+            loss=-loss.mean()
+            return loss,prob
+        else:
+            return prob
+
+class DecoderClassifier(nn.Module):
+    def __init__(self, encoder, config, tokenizer, args):
+        super(DecoderClassifier, self).__init__()
+        self.encoder = encoder
+        self.config=config
+        self.tokenizer=tokenizer
+        self.args=args
+        self.classifier = nn.Linear(config.hidden_size, 4)
+        #self.classifier = self.classifier.to(args.device)
+
+        for p in self.encoder.parameters():
+            p.requires_grad = False
+
+
+        
+    def forward(self, input_ids=None, labels=None, weight=None, **kwargs):
+
+
+        attention_mask = input_ids.ne(self.tokenizer.pad_token_id)
+       
+        #print(f"Input Shape: {input_ids.shape}, Attention Mask Shape: {attention_mask.shape}")
+
+        if isinstance(self.encoder, PeftModel):  
+            outputs = self.encoder(input_ids) 
+            #  Do NOT pass `attention_mask`
+        else:
+            outputs = self.encoder(input_ids, attention_mask=attention_mask)
+            
+        #outputs = self.encoder(input_ids, attention_mask=attention_mask)
+        #print(outputs.shape)
+        hidden_states = outputs[0]
+        #print(hidden_states.shape)
+        self.classifier = self.classifier.to(hidden_states.device)
+        logits = self.classifier(hidden_states.to(self.classifier.weight.dtype))
+        
+        batch_size = input_ids.size(0)
+        
+        if self.config.pad_token_id is None and batch_size != 1:
+            raise ValueError("Cannot handle batch sizes > 1 if no padding token is defined.")
+        if self.config.pad_token_id is None:
+            sequence_lengths = -1
+        else:
+            if input_ids is not None:
+                # if no pad token found, use modulo instead of reverse indexing for ONNX compatibility
+                sequence_lengths = torch.eq(input_ids, self.config.pad_token_id).int().argmax(-1) - 1
+                sequence_lengths = sequence_lengths % input_ids.shape[-1]
+                sequence_lengths = sequence_lengths.to(logits.device)
+            else:
+                sequence_lengths = -1
+
+        pooled_logits = logits[torch.arange(batch_size, device=logits.device), sequence_lengths]
+        prob = nn.functional.softmax(pooled_logits, dim=-1)
+
+        #print(f"Labels Inside Forward: {labels}") 
+        if labels is not None:
+            if isinstance(labels, list) or labels.dim() == 0:  # convert list or empty tensor to proper shape
+                labels = torch.tensor(labels, device=logits.device, dtype=torch.long).view(-1)
+            labels = labels.to(logits.device)
+            #print(f" Labels Shape After Processing: {labels.shape}")
+            loss_fct = nn.CrossEntropyLoss(weight=weight)
+
+            #loss = loss_fct(pooled_logits.view(-1, 2), labels.view(-1))
+            loss = loss_fct(pooled_logits, labels.view(-1))
+            #print(f"Returning: Loss: {loss}, Prob: {prob.shape}")
+            return loss, prob
+        else:
+            #print(f"Returning: Prob: {prob.shape}")
+            return prob
+
+
+    def forward_with_logits(self, input_ids=None, labels=None, weight=None, **kwargs):
+
+
+        attention_mask = input_ids.ne(self.tokenizer.pad_token_id)
+       
+        #print(f"Input Shape: {input_ids.shape}, Attention Mask Shape: {attention_mask.shape}")
+
+        if isinstance(self.encoder, PeftModel):  
+            outputs = self.encoder(input_ids) 
+            #  Do NOT pass `attention_mask`
+        else:
+            outputs = self.encoder(input_ids, attention_mask=attention_mask)
+            
+        #outputs = self.encoder(input_ids, attention_mask=attention_mask)
+        #print(outputs.shape)
+        hidden_states = outputs[0]
+        #print(hidden_states.shape)
+        self.classifier = self.classifier.to(hidden_states.device)
+        logits = self.classifier(hidden_states.to(self.classifier.weight.dtype))
+        
+        batch_size = input_ids.size(0)
+        
+        if self.config.pad_token_id is None and batch_size != 1:
+            raise ValueError("Cannot handle batch sizes > 1 if no padding token is defined.")
+        if self.config.pad_token_id is None:
+            sequence_lengths = -1
+        else:
+            if input_ids is not None:
+                # if no pad token found, use modulo instead of reverse indexing for ONNX compatibility
+                sequence_lengths = torch.eq(input_ids, self.config.pad_token_id).int().argmax(-1) - 1
+                sequence_lengths = sequence_lengths % input_ids.shape[-1]
+                sequence_lengths = sequence_lengths.to(logits.device)
+            else:
+                sequence_lengths = -1
+
+        pooled_logits = logits[torch.arange(batch_size, device=logits.device), sequence_lengths]
+        prob = nn.functional.softmax(pooled_logits, dim=-1)
+
+        #print(f"Labels Inside Forward: {labels}") 
+        if labels is not None:
+            if isinstance(labels, list) or labels.dim() == 0:  # convert list or empty tensor to proper shape
+                labels = torch.tensor(labels, device=logits.device, dtype=torch.long).view(-1)
+            labels = labels.to(logits.device)
+            #print(f" Labels Shape After Processing: {labels.shape}")
+            loss_fct = nn.CrossEntropyLoss(weight=weight)
+
+            #loss = loss_fct(pooled_logits.view(-1, 2), labels.view(-1))
+            loss = loss_fct(pooled_logits, labels.view(-1))
+            #print(f"Returning: Loss: {loss}, Prob: {prob.shape}")
+            return loss, prob, pooled_logits
+        else:
+            #print(f"Returning: Prob: {prob.shape}")
+            return prob, pooled_logits
