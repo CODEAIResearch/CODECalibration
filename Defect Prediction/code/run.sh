@@ -1,5 +1,5 @@
 
-python run.py \
+python run_new.py \
     --output_dir=./saved_models \
     --model_type=deepseek \
     --tokenizer_name=/home/rsr200002/LLMs/deepseek_coder_67b_instruct \
