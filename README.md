@@ -41,7 +41,7 @@ python behavioral.py \
 --model_name_or_path={path to model}
 This will create different plots, reliability diagrams, as well as evaluation metrics for different uncertainty metrics on each scaling technique. 
 
-
+## MECE and MUCE scores for each subject
 <details>
   <summary>MECE/MUCE scores</summary>
   Due to README space limits, see the full table here:
