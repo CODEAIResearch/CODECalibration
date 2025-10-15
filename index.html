@@ -45,27 +45,22 @@
                     <h2 class="title is-3">Abstract</h2>
                     <div class="content has-text-justified">
                         <p>
-                        Deep learning models have shown significant promise in coderelated tasks. While confidence calibration techniques have been
-proposed to improve model reliability, their effectiveness in realworld tasks with strict accuracy requirements remains uncertain. In
-this paper, we investigate two key questions: first, whether existing
-measurement metrics, including confidence scores and uncertainty
-metrics, are effective for guiding selective prediction; and second,
-whether existing calibration techniques can improve these metrics to better identify cases where model predictions are likely to
-succeed or fail </br>
-                            Through a systematic study using code models for defect prediction and vulnerability detection, our findings reveal that traditional
-calibration metrics often fail to prioritize high-confidence predictions, which are crucial for practical deployment. To address this,
-we propose a novel metric based on variation consistency across
-model predictions, leveraging insights from ensemble methods
-while reducing computational overhead. Additionally, we introduce
-a weighted calibration technique that emphasizes high-confidence
-predictions by assigning greater weight to confident outputs while
-reducing the influence of low-confidence samples. </br>
+                        Deep learning models have demonstrated strong performance in code-related tasks, yet their reliability remains
+limited by poor uncertainty calibration. Existing techniques focus on aligning predicted confidence with
+correctness in a numerical sense, but often fail to support reliable decision-making in practice. This paper
+identifies a core limitation: numerical calibration alone is insufficient, especially in settings where models
+must decide whether to answer or abstain. </br>
+                            We conduct a systematic study to assess whether commonly used confidence and measurement metrics
+are effective for guiding selective prediction in deep code models, and whether standard post-hoc calibration
+techniques improve their ability to distinguish reliable from unreliable predictions. Across two tasks, we
+evaluate 13 uncertainty metrics and three calibration methods over four state-of-the-art models, revealing
+that conventional techniques often misrepresent prediction quality, particularly in high-confidence regions. </br>
 
-                        Our empirical results show that the proposed methods improve
-the ability to distinguish between correct and incorrect predictions
-upto 96.3%, enhancing selective prediction performance. These
-insights provide a promising direction for increasing the reliability
-and practical utility of deep learning-based code models.
+                        To address this, we introduce a lightweight behavioral calibration method, a post-hoc method that estimates
+per-instance correctness likelihoods from logit-derived features and applies a threshold-based rule for selective
+prediction. Our method improves miscorrection validation rate by up to 68.8% and selective accuracy by up to
+15.6%, across all models and tasks. These findings establish behavioral calibration as a necessary direction for
+enhancing the reliability of deep code models beyond numeric calibration alone.
     </p>
                     </div>
                 </div>
@@ -73,7 +68,14 @@ and practical utility of deep learning-based code models.
         </div>
     </section>
 
+<details>
+  <summary>MECE/MUCE scores</summary>
+  Due to README space limits, see the full table here:
+  <a href="https://github.com/CODEAIResearch/CODECalibration/blob/main/MECE_MUCE_SCORES/uncertainty_metrics.csv">uncertainty_metrics.csv</a>.
+</details>
+
     <!-- Reliability Plots Section -->
+    <!--
     <section class="section">
         <div class="container is-max-desktop">
             <h1 class="section-caption">Example of Reliability Plots</h1>
@@ -119,5 +121,6 @@ and practical utility of deep learning-based code models.
             </figure>
         </div>
     </section>
+    -->
 </body>
 </html>
