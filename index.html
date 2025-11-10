@@ -75,118 +75,306 @@ enhancing the reliability of deep code models beyond numeric calibration alone.
 </details>
 
 
-<section id="motivation">
-  <h2>Motivation</h2>
-  <p>
-    Modern deep code models are increasingly deployed for vulnerability detection, defect prediction, and other
-    high-impact software engineering tasks, yet their predictive confidence is systematically unreliable.
-    Overconfident mispredictions on security- and quality-critical code fragments introduce concrete deployment risks,
-    particularly when model scores are integrated into CI pipelines, automated triage, or semi-autonomous decision flows.
-  </p>
-  <p>
-    Conventional calibration techniques and uncertainty metrics primarily target distribution-level summaries
-    (e.g., deviations between predicted confidence and empirical accuracy), without ensuring that
-    high-confidence outputs correspond to decisions that can be safely trusted.
-    This study addresses the need to transform inherently unreliable code models into
-    <strong>partially reliable decision components</strong> by:
-    (i) rigorously evaluating whether existing uncertainty estimation and calibration methods
-    support robust selective prediction and abstention, and
-    (ii) introducing calibration strategies explicitly aligned with instance-level correctness
-    rather than cosmetic improvements in aggregate metrics.
-  </p>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Behavioral Calibration for Deep Code Models</title>
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-soft: #0b1020;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56,189,248,0.12);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border-soft: rgba(148,163,253,0.18);
+      --radius-xl: 18px;
+      --radius-xxl: 26px;
+      --shadow-soft: 0 18px 45px rgba(15,23,42,0.55);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, -apple-system, Segoe UI, sans-serif;
+      --transition-fast: 0.22s ease;
+    }
 
-    <section id="main-findings">
-  <h2>Main Findings</h2>
+    * {
+      box-sizing: border-box;
+    }
 
-  <h3>1. Strong miscalibration in deep code models</h3>
-  <p>
-    Deep code classifiers for vulnerability detection and defect prediction exhibit substantial gaps between
-    predicted confidence and empirical accuracy, with severe overconfidence on erroneous predictions in
-    decision-critical regions.
-  </p>
+    body {
+      margin: 0;
+      padding: 40px 16px 56px;
+      font-family: var(--font-sans);
+      background: radial-gradient(circle at top, #111827 0, #020817 40%, #000 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
 
-  <h3>2. Sensitivity to task, model, and metric choice</h3>
-  <p>
-    No single uncertainty metric consistently separates correct from incorrect predictions across architectures,
-    datasets, and tasks. Metrics that appear effective in one configuration can degrade reliability in another,
-    indicating strong context dependence.
-  </p>
+    .page-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
 
-  <h3>3. Limited effectiveness of standard post-hoc calibration</h3>
-  <p>
-    Temperature scaling, Platt scaling, and isotonic regression frequently reduce global calibration error
-    but do not reliably improve selective prediction performance or high-confidence decision safety.
-    Lower ECE/UCE does not guarantee safer acceptance of model outputs.
-  </p>
+    .page-title {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 8px;
+    }
 
-  <h3>4. Misalignment between standard metrics and deployment needs</h3>
-  <p>
-    Aggregate calibration measures obscure behavior on high-confidence subsets, where even a small number
-    of catastrophic failures is unacceptable. Models can satisfy global calibration criteria while remaining
-    unreliable in precisely the operating regimes practitioners depend on.
-  </p>
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 28px;
+    }
 
-  <h3>5. Fragility of naive selective prediction</h3>
-  <p>
-    Thresholding raw confidence or generic uncertainty scores yields unstable selective predictors:
-    either many incorrect predictions are classified as confident, or large fractions of correct
-    predictions are unnecessarily rejected, limiting effective partial automation.
-  </p>
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.8fr);
+      gap: 20px;
+      align-items: flex-start;
+    }
 
-  <h3>6. Behavioral calibration as a deployment-aligned objective</h3>
-  <p>
-    Reframing calibration as per-instance correctness estimation produces behaviors better matched to
-    practical reliability requirements. Utilizing richer information from the full logit distribution,
-    rather than only the top-class probability, enables more accurate discrimination between trustworthy
-    and untrustworthy predictions.
-  </p>
+    @media (max-width: 840px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
-  <h3>7. Logit-based calibration improves partial reliability</h3>
-  <p>
-    A lightweight logit-based calibration approach improves selective prediction by increasing accuracy
-    at fixed coverage, capturing a larger fraction of wrong predictions, and reducing unnecessary abstention
-    on correct predictions. This enhancement is achieved without modifying or retraining the underlying models.
-  </p>
-</section>
+    section {
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.04), transparent 55%) var(--bg-soft);
+      border-radius: var(--radius-xxl);
+      padding: 20px 20px 18px;
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(22px);
+      position: relative;
+      overflow: hidden;
+    }
 
-<section id="key-insights">
-  <h2>Key Insights and Takeaways</h2>
+    section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, var(--accent-soft), transparent 70%);
+      opacity: 0.16;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
 
-  <h3>1. Reliability is fundamentally instance-level</h3>
-  <p>
-    For practical code intelligence, the central question is whether a specific prediction is safe to act on.
-    Calibration and evaluation must explicitly target and report instance-level correctness estimation.
-  </p>
+    section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 0 0 10px;
+      position: relative;
+      z-index: 1;
+    }
 
-  <h3>2. Standard calibration metrics are not sufficient</h3>
-  <p>
-    ECE/UCE-style scores alone are inadequate indicators of deployment safety.
-    Any claim of reliability must be supported by selective prediction behavior, coverage–risk trade-offs,
-    and error analysis in high-confidence regions.
-  </p>
+    section p,
+    section li {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
 
-  <h3>3. Uncertainty is multi-dimensional and context-dependent</h3>
-  <p>
-    No single uncertainty measure is universally robust for code tasks.
-    Reliable systems should treat uncertainty as a composite signal and validate it per model, per dataset,
-    and per application scenario.
-  </p>
+    .muted {
+      color: var(--muted);
+    }
 
-  <h3>4. Selective prediction is the right abstraction for partial automation</h3>
-  <p>
-    Positioning code models as components that can abstain under uncertainty is more realistic than expecting
-    uniformly accurate predictions. Effective abstention, however, requires behaviorally aligned calibration
-    instead of naive confidence thresholding.
-  </p>
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(148,163,253,0.35);
+      color: var(--accent);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
 
-  <h3>5. Logit-informed calibration is a practical upgrade path</h3>
-  <p>
-    Exploiting the structure of the logit distribution to estimate correctness provides a scalable,
-    model-agnostic mechanism to convert existing deep code models into partially reliable predictors,
-    suitable for integration into security and quality assurance workflows without retraining the base models.
-  </p>
-</section>
+    .badge span {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Main Findings & Insights layout */
+
+    #main-findings h3,
+    #key-insights h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 10px 0 3px;
+      color: var(--accent);
+    }
+
+    #main-findings p + h3,
+    #key-insights p + h3 {
+      margin-top: 9px;
+    }
+
+    #main-findings p,
+    #key-insights p {
+      color: var(--muted);
+    }
+
+    .list-compact {
+      margin-top: 4px;
+    }
+
+    .list-compact li {
+      margin: 3px 0;
+    }
+
+    /* Accent underline */
+    .underline-accent {
+      box-shadow: 0 1px 0 rgba(148,163,253,0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+    <h1 class="page-title">Behavioral Calibration for Deep Code Models</h1>
+    <p class="page-subtitle">
+      Summary of motivation, empirical findings, and deployment-oriented insights.
+    </p>
+
+    <div class="grid">
+      <!-- Motivation -->
+      <section id="motivation">
+        <div class="badge"><span></span>Motivation</div>
+        <h2>Why Reliability Must Be Behavioral</h2>
+        <p>
+          Modern deep code models are increasingly deployed for vulnerability detection, defect prediction,
+          and other high-impact software engineering tasks, yet their predictive confidence is systematically
+          unreliable. Overconfident mispredictions on security- and quality-critical code fragments introduce
+          concrete deployment risks, particularly when model scores are integrated into CI pipelines, automated
+          triage, or semi-autonomous decision flows.
+        </p>
+        <p>
+          Conventional calibration techniques and uncertainty metrics primarily target distribution-level
+          summaries (for example, deviations between predicted confidence and empirical accuracy), without
+          ensuring that high-confidence outputs correspond to decisions that can be safely trusted.
+          The study addresses the need to transform inherently unreliable code models into
+          <span class="underline-accent">partially reliable decision components</span> by
+          rigorously evaluating whether existing uncertainty estimation and calibration methods support robust
+          selective prediction and abstention, and by introducing calibration strategies explicitly aligned
+          with instance-level correctness rather than cosmetic improvements in aggregate metrics.
+        </p>
+      </section>
+
+      <!-- Main Findings -->
+      <section id="main-findings">
+        <div class="badge"><span></span>Main Findings</div>
+        <h2>Empirical Characterization</h2>
+
+        <h3>1. Strong miscalibration in deep code models</h3>
+        <p>
+          Deep code classifiers for vulnerability detection and defect prediction exhibit substantial gaps
+          between predicted confidence and empirical accuracy, with severe overconfidence on erroneous
+          predictions in decision-critical regions.
+        </p>
+
+        <h3>2. Sensitivity to task, model, and metric choice</h3>
+        <p>
+          No single uncertainty metric consistently separates correct from incorrect predictions across
+          architectures, datasets, and tasks. Metrics that appear effective in one configuration can
+          degrade reliability in another, indicating strong context dependence.
+        </p>
+
+        <h3>3. Limited effectiveness of standard post-hoc calibration</h3>
+        <p>
+          Temperature scaling, Platt scaling, and isotonic regression frequently reduce global calibration
+          error but do not reliably improve selective prediction performance or high-confidence decision
+          safety. Lower ECE/UCE does not guarantee safer acceptance of model outputs.
+        </p>
+
+        <h3>4. Misalignment between standard metrics and deployment needs</h3>
+        <p>
+          Aggregate calibration measures obscure behavior on high-confidence subsets, where even a small
+          number of catastrophic failures is unacceptable. Models can satisfy global calibration criteria
+          while remaining unreliable in the operating regimes practitioners depend on.
+        </p>
+
+        <h3>5. Fragility of naive selective prediction</h3>
+        <p>
+          Thresholding raw confidence or generic uncertainty scores yields unstable selective predictors:
+          either many incorrect predictions are classified as confident, or large fractions of correct
+          predictions are unnecessarily rejected, limiting effective partial automation.
+        </p>
+
+        <h3>6. Behavioral calibration as a deployment-aligned objective</h3>
+        <p>
+          Reframing calibration as per-instance correctness estimation produces behaviors better matched to
+          practical reliability requirements. Utilizing richer information from the full logit distribution,
+          rather than only the top-class probability, enables more accurate discrimination between
+          trustworthy and untrustworthy predictions.
+        </p>
+
+        <h3>7. Logit-based calibration improves partial reliability</h3>
+        <p>
+          A lightweight logit-based calibration approach improves selective prediction by increasing
+          accuracy at fixed coverage, capturing a larger fraction of wrong predictions, and reducing
+          unnecessary abstention on correct predictions, without modifying or retraining the underlying models.
+        </p>
+      </section>
+    </div>
+
+    <!-- Key Insights -->
+    <section id="key-insights" style="margin-top:24px;">
+      <div class="badge"><span></span>Key Insights &amp; Takeaways</div>
+      <h2>Design and Evaluation Implications</h2>
+
+      <h3>1. Reliability is fundamentally instance-level</h3>
+      <p>
+        For practical code intelligence, the central question is whether a specific prediction is safe to act on.
+        Calibration and evaluation must explicitly target and report instance-level correctness estimation.
+      </p>
+
+      <h3>2. Standard calibration metrics are not sufficient</h3>
+      <p>
+        ECE/UCE-style scores alone are inadequate indicators of deployment safety. Claims of reliability must be
+        supported by selective prediction behavior, coverage–risk trade-offs, and error analysis in
+        high-confidence regions.
+      </p>
+
+      <h3>3. Uncertainty is multi-dimensional and context-dependent</h3>
+      <p>
+        No single uncertainty measure is universally robust for code tasks. Reliable systems should treat
+        uncertainty as a composite signal and validate it per model, per dataset, and per application scenario.
+      </p>
+
+      <h3>4. Selective prediction is the right abstraction for partial automation</h3>
+      <p>
+        Positioning code models as components that can abstain under uncertainty is more realistic than expecting
+        uniformly accurate predictions. Effective abstention requires behaviorally aligned calibration instead of
+        naive confidence thresholding.
+      </p>
+
+      <h3>5. Logit-informed calibration is a practical upgrade path</h3>
+      <p>
+        Exploiting the structure of the logit distribution to estimate correctness provides a scalable,
+        model-agnostic mechanism to convert existing deep code models into partially reliable predictors,
+        suitable for integration into security and quality assurance workflows without retraining the base models.
+      </p>
+    </section>
+  </div>
+</body>
+</html>
+
     <!-- Reliability Plots Section -->
     <!--
     <section class="section">
