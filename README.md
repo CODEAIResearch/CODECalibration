@@ -1,6 +1,6 @@
 # Beyond Confidence: Rethinking Uncertainty Calibration in Deep Code Models
 
-Currently, we support two software engineering tasks: Vulnerability detection and defect prediction. For each folder, we include the code for four models: StarCoder-3B, Qwen2.5-Coder-7B, CodeLlama-7B, DeepSeek-Coder-7B  
+Currently, we support two software engineering tasks: Vulnerability detection and defect prediction. For each folder, we include the code for seven models: CodeBERT, GraphCodeBERT, RoBERTa,StarCoder-3B, Qwen2.5-Coder-7B, CodeLlama-7B, DeepSeek-Coder-7B  
 
 ### We explain how to run our code in the below:
 If you want to run the vulnerability detection task, please go to vulnerability detection folder, then select the model folder you want to run. For each folder, unzip the dataset.zip file. 
