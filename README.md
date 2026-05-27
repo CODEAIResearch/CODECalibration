@@ -42,6 +42,13 @@ python behavioral.py \
 This will create different plots, reliability diagrams, as well as evaluation metrics for different uncertainty metrics on each scaling technique. 
 
 
+## Detailed results of evaluation metrics for each subject
+<details>
+  <summary>Summary of the effectiveness of evaluation metrics</summary>
+  Due to README space limits, see the full table here:
+  <a href="https://github.com/CODEAIResearch/CODECalibration/blob/main/MECE_MUCE_SCORES/uncertainty_metrics.csv">uncertainty_metrics.csv</a>.
+</details>
+
 
 
 
