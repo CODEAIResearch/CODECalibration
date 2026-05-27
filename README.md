@@ -32,7 +32,7 @@ For each model, please change the following commands accordingly:
 --model_name_or_path={path to model}
 This will create different plots, reliability diagrams, as well as evaluation metrics for different uncertainty metrics on each scaling technique. 
 
-## 4) To run behavioral calibration proposed by us: 
+## 4) To run behavioral calibration: 
 ./run_ts.sh 
 For each model, please change the following commands accordingly:
 python behavioral.py \
@@ -41,12 +41,6 @@ python behavioral.py \
 --model_name_or_path={path to model}
 This will create different plots, reliability diagrams, as well as evaluation metrics for different uncertainty metrics on each scaling technique. 
 
-## MECE and MUCE scores for each subject
-<details>
-  <summary>MECE/MUCE scores</summary>
-  Due to README space limits, see the full table here:
-  <a href="https://github.com/CODEAIResearch/CODECalibration/blob/main/MECE_MUCE_SCORES/uncertainty_metrics.csv">uncertainty_metrics.csv</a>.
-</details>
 
 
 
