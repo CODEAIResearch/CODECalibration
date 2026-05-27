@@ -46,7 +46,7 @@ This will create different plots, reliability diagrams, as well as evaluation me
 <details>
   <summary>Summary of the effectiveness of evaluation metrics</summary>
   Due to README space limits, see the full table here:
-  <a href="https://github.com/CODEAIResearch/CODECalibration/blob/main/MECE_MUCE_SCORES/uncertainty_metrics.csv">uncertainty_metrics.csv</a>.
+  <a href="https://github.com/CODEAIResearch/CODECalibration/blob/main/Detailed_Results/DP%20results.xlsx">Defect Prediction</a> and <a href="https://github.com/CODEAIResearch/CODECalibration/blob/main/Detailed_Results/VD%20results.xlsx">Vulnerability Detection</a> .
 </details>
 
 
