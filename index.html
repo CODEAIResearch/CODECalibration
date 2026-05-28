@@ -237,6 +237,18 @@ enhancing the reliability of deep code models beyond numeric calibration alone.
     .underline-accent {
       box-shadow: 0 1px 0 rgba(148,163,253,0.45);
     }
+
+    .main-caption {
+  margin-top: 1rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #eaf2ff;
+}
+
+.subcaption {
+  color: #dbeafe;
+}
+
   </style>
 </head>
 <body>
@@ -419,7 +431,7 @@ See the full table here:
 
     <div class="subfigure">
       <img
-        src="./Example/Entopy_distribution_temperature_scaled.png"
+        src="./Example/Entopy_distribution_platt_scaled.png"
         alt="Entropy score distribution after Platt scaling"
       />
       <p class="subcaption">
@@ -430,7 +442,7 @@ See the full table here:
 
     <div class="subfigure">
       <img
-        src="./Example/Entopy_distribution_uncalibrated.png"
+        src="./Example/Entopy_distribution_isotonic_regression.png"
         alt="Entropy score distribution after isotonic regression"
       />
       <p class="subcaption">
@@ -440,17 +452,7 @@ See the full table here:
     </div>
 
   </div>
-    .main-caption {
-  margin-top: 1rem;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: #eaf2ff;
-}
-
-.subcaption {
-  color: #dbeafe;
-}
-
+    
   <figcaption class="main-caption">
     <strong>Figure.</strong> Entropy-based score distributions for correct and incorrect predictions
     before and after calibration. Lower entropy corresponds to higher confidence. Calibration changes
