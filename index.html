@@ -372,7 +372,7 @@ enhancing the reliability of deep code models beyond numeric calibration alone.
   <div class="container">
     <h2>Detailed Results</h2>
 
-<details>
+
 <summary>Detailed Results on Each Task for ECE, MECE, BS, and AUARC </summary>
   <summary>Results Defect Prediction Task</summary>
   See the full tables here:
@@ -388,8 +388,8 @@ See the full table here:
     
 <section id="Example" class="section">
   <div class="container">
-    <h2>Distribution of Entropy Scores </h2>
-<details>
+    <h2>Example: High-Confidence-Error Analysiss </h2>
+
 <summary> Distribution of Entropy Scores before and after calibration on correct and incorrect predictions</summary>
     
   <figure class="entropy-figure">
@@ -442,7 +442,7 @@ See the full table here:
   </div>
 
   <figcaption class="main-caption">
-    <strong>Figure X.</strong> Entropy-based score distributions for correct and incorrect predictions
+    <strong>Figure.</strong> Entropy-based score distributions for correct and incorrect predictions
     before and after calibration. Lower entropy corresponds to higher confidence. Calibration changes
     the score distribution, but incorrect predictions can still remain in high-confidence regions.
     Isotonic regression additionally shows bucket collapse, where many samples are assigned nearly
@@ -450,8 +450,15 @@ See the full table here:
   </figcaption>
 </figure>
  
-  
-</details>
+  <p>
+    Beyond aggregate calibration metrics, we further inspect whether incorrect predictions remain
+    in score regions that would be considered reliable by a selective-prediction system. Figure X
+    shows the entropy-based score distributions for correct and incorrect predictions under four
+    settings: uncalibrated, temperature scaling, Platt scaling, and isotonic regression. Since the
+    score is entropy-derived, lower entropy corresponds to higher model confidence; equivalently,
+    a confidence score can be obtained as one minus the normalized entropy.
+  </p>
+
 
   </div>
 </section>
