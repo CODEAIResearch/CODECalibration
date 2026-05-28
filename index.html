@@ -440,9 +440,19 @@ See the full table here:
     </div>
 
   </div>
+    .main-caption {
+  margin-top: 1rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #eaf2ff;
+}
+
+.subcaption {
+  color: #dbeafe;
+}
 
   <figcaption class="main-caption">
-    Figure. Entropy-based score distributions for correct and incorrect predictions
+    <strong>Figure.</strong> Entropy-based score distributions for correct and incorrect predictions
     before and after calibration. Lower entropy corresponds to higher confidence. Calibration changes
     the score distribution, but incorrect predictions can still remain in high-confidence regions.
     Isotonic regression additionally shows bucket collapse, where many samples are assigned nearly
@@ -459,6 +469,7 @@ See the full table here:
     score is entropy-based, lower entropy corresponds to higher confidence, while higher entropy
     corresponds to greater uncertainty.
   </p>
+      <br>
 
   <p>
     The uncalibrated distribution shows that correct predictions are generally concentrated in
@@ -467,7 +478,7 @@ See the full table here:
     predictions also appear in low-entropy regions, meaning that the model can still produce
     confident but wrong outputs. These cases are important because semantic ambiguity or subtle
     code-generation errors may not necessarily lead to high uncertainty.
-  </p>
+  </p><br>
 
   <p>
     After temperature scaling, the score distribution changes, but the overlap between correct and
@@ -476,7 +487,7 @@ See the full table here:
     fundamentally change the relative ordering of predictions. Therefore, incorrect predictions that
     were assigned confident scores before calibration may still remain difficult to reject after
     calibration.
-  </p>
+  </p><br>
 
   <p>
     Platt scaling also reshapes the score distribution by learning a parametric mapping from model
@@ -486,7 +497,7 @@ See the full table here:
     level while still failing to separate all erroneous outputs from correct ones. For selective
     prediction, this distinction is important because rejection performance depends on whether
     incorrect predictions receive higher uncertainty than correct predictions.
-  </p>
+  </p><br>
 
   <p>
     Isotonic regression shows a more severe failure mode. Because isotonic regression learns a
@@ -495,16 +506,16 @@ See the full table here:
     concentrated into one narrow score region rather than being distributed across the full score
     range. Consequently, correct and incorrect predictions become highly overlapping in the same
     region, reducing the effective resolution of the calibrated uncertainty score.
-  </p>
+  </p><br>
 
   <p>
-    Overall, the distribution analysis shows that improved calibration does not necessarily remove
-    high-confidence errors. Post-hoc calibration adjusts the score scale, but it does not correct
-    the underlying prediction or resolve semantic ambiguity in the generated code. As a result,
-    some incorrect predictions can remain in high-confidence regions even after calibration. In
-    addition, when calibration collapses many samples into the same score bucket, as observed with
-    isotonic regression, the calibrated score becomes less useful for ranking predictions and
-    rejecting likely errors.
+    In conclusion, the analysis shows that post-hoc calibration improves the reliability of confidence estimates at the aggregate level, 
+      but it does not necessarily make incorrect predictions separable from correct ones. 
+    In particular, incorrect predictions can remain in low-entropy/high-confidence regions after calibration, 
+      explaining why improved ECE or Brier score may not always lead to safer selective prediction. 
+      The isotonic regression result further highlights a calibration-specific failure mode: 
+      bucket collapse reduces score resolution by mapping many samples to nearly identical calibrated scores,
+      making rejection decisions less reliable.
   </p>
 
 
