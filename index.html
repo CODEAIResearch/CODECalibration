@@ -388,11 +388,68 @@ See the full table here:
     
 <section id="Example" class="section">
   <div class="container">
-    <h2>Distribution of Vanilla Scores </h2>
+    <h2>Distribution of Entropy Scores </h2>
 <details>
-<summary> Distribution of Vanilla Scores before and after calibration on correct and incorrect predictions</summary>
-  <summary>Results of CodeBERT, RoBERTa, and GraphCodeBERT models before calibration</summary>
-  See the full table here:
+<summary> Distribution of Entropy Scores before and after calibration on correct and incorrect predictions</summary>
+    
+  <figure class="entropy-figure">
+  <div class="figure-grid">
+
+    <div class="subfigure">
+      <img
+        src="./Example/Entopy_distribution_uncalibrated.png"
+        alt="Entropy score distribution for uncalibrated model"
+      />
+      <p class="subcaption">
+        (a) Uncalibrated. Incorrect predictions overlap with correct predictions, including in
+        confident score regions.
+      </p>
+    </div>
+
+    <div class="subfigure">
+      <img
+        src="./Example/Entopy_distribution_temperature_scaled.png"
+        alt="Entropy score distribution after temperature scaling"
+      />
+      <p class="subcaption">
+        (b) Temperature scaling. Calibration reshapes the distribution, but incorrect predictions
+        remain mixed with correct predictions.
+      </p>
+    </div>
+
+    <div class="subfigure">
+      <img
+        src="./Example/Entopy_distribution_temperature_scaled.png"
+        alt="Entropy score distribution after Platt scaling"
+      />
+      <p class="subcaption">
+        (c) Platt scaling. The calibrated scores still show overlap between correct and incorrect
+        predictions.
+      </p>
+    </div>
+
+    <div class="subfigure">
+      <img
+        src="./Example/Entopy_distribution_uncalibrated.png"
+        alt="Entropy score distribution after isotonic regression"
+      />
+      <p class="subcaption">
+        (d) Isotonic regression. Bucket collapse maps most samples into one overlapping score
+        region, reducing separability.
+      </p>
+    </div>
+
+  </div>
+
+  <figcaption class="main-caption">
+    <strong>Figure X.</strong> Entropy-based score distributions for correct and incorrect predictions
+    before and after calibration. Lower entropy corresponds to higher confidence. Calibration changes
+    the score distribution, but incorrect predictions can still remain in high-confidence regions.
+    Isotonic regression additionally shows bucket collapse, where many samples are assigned nearly
+    identical calibrated scores.
+  </figcaption>
+</figure>
+ 
   
 </details>
 
