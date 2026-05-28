@@ -442,21 +442,69 @@ See the full table here:
   </div>
 
   <figcaption class="main-caption">
-    <strong>Figure.</strong> Entropy-based score distributions for correct and incorrect predictions
+    Figure. Entropy-based score distributions for correct and incorrect predictions
     before and after calibration. Lower entropy corresponds to higher confidence. Calibration changes
     the score distribution, but incorrect predictions can still remain in high-confidence regions.
     Isotonic regression additionally shows bucket collapse, where many samples are assigned nearly
     identical calibrated scores.
   </figcaption>
 </figure>
- 
+
+<h>Discussion</h>
+ <p>
+    To further examine high-confidence errors, we analyze the entropy-based score distributions
+    of correct and incorrect predictions before and after calibration. This analysis complements
+    aggregate calibration metrics such as ECE and Brier score by showing whether incorrect
+    predictions are actually separated from correct predictions in uncertainty space. Since the
+    score is entropy-based, lower entropy corresponds to higher confidence, while higher entropy
+    corresponds to greater uncertainty.
+  </p>
+
   <p>
-    Beyond aggregate calibration metrics, we further inspect whether incorrect predictions remain
-    in score regions that would be considered reliable by a selective-prediction system. Figure X
-    shows the entropy-based score distributions for correct and incorrect predictions under four
-    settings: uncalibrated, temperature scaling, Platt scaling, and isotonic regression. Since the
-    score is entropy-derived, lower entropy corresponds to higher model confidence; equivalently,
-    a confidence score can be obtained as one minus the normalized entropy.
+    The uncalibrated distribution shows that correct predictions are generally concentrated in
+    lower-entropy regions, indicating that the model is often more confident when it is correct.
+    However, the incorrect predictions are not fully separated from the correct ones. Some incorrect
+    predictions also appear in low-entropy regions, meaning that the model can still produce
+    confident but wrong outputs. These cases are important because semantic ambiguity or subtle
+    code-generation errors may not necessarily lead to high uncertainty.
+  </p>
+
+  <p>
+    After temperature scaling, the score distribution changes, but the overlap between correct and
+    incorrect predictions remains. Temperature scaling applies a global rescaling to the logits, so
+    it can reduce systematic overconfidence and improve calibration metrics. However, it does not
+    fundamentally change the relative ordering of predictions. Therefore, incorrect predictions that
+    were assigned confident scores before calibration may still remain difficult to reject after
+    calibration.
+  </p>
+
+  <p>
+    Platt scaling also reshapes the score distribution by learning a parametric mapping from model
+    scores to calibrated probabilities. In our results, Platt scaling shifts many predictions toward
+    a different score range, but incorrect predictions still overlap with correct predictions. This
+    indicates that calibration can improve the reliability of confidence values at the aggregate
+    level while still failing to separate all erroneous outputs from correct ones. For selective
+    prediction, this distinction is important because rejection performance depends on whether
+    incorrect predictions receive higher uncertainty than correct predictions.
+  </p>
+
+  <p>
+    Isotonic regression shows a more severe failure mode. Because isotonic regression learns a
+    non-parametric stepwise monotonic mapping, many different input scores can be assigned the same
+    calibrated output value. In our results, this causes a bucket-collapse effect: most samples are
+    concentrated into one narrow score region rather than being distributed across the full score
+    range. Consequently, correct and incorrect predictions become highly overlapping in the same
+    region, reducing the effective resolution of the calibrated uncertainty score.
+  </p>
+
+  <p>
+    Overall, the distribution analysis shows that improved calibration does not necessarily remove
+    high-confidence errors. Post-hoc calibration adjusts the score scale, but it does not correct
+    the underlying prediction or resolve semantic ambiguity in the generated code. As a result,
+    some incorrect predictions can remain in high-confidence regions even after calibration. In
+    addition, when calibration collapses many samples into the same score bucket, as observed with
+    isotonic regression, the calibrated score becomes less useful for ranking predictions and
+    rejecting likely errors.
   </p>
 
 
